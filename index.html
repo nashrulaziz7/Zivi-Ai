@@ -133,17 +133,19 @@
             .val-zero { color: #cbd5e1 !important; }
             .val-bold { font-weight: 800; color: #1e3a8a; }
             
-            /* Table Persiswa (Walas) - Layout 2 Kolom Kiri-Kanan */
+            /* Table Persiswa (Walas) - Layout 2 Kolom Kiri-Kanan Minimalis */
             .table-siswa { width: 100%; border-collapse: collapse; font-size: 7.5px; text-align: center; }
             .table-siswa th { padding: 4px 1px; color: #475569; font-weight: 800; border-bottom: 1px solid #e2e8f0; font-size: 7px; text-align: center; }
             .table-siswa td { padding: 3px 1px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
             .table-siswa tbody tr:nth-child(even) td { background-color: #f8fafc !important; }
             .table-siswa tbody tr:nth-child(odd) td { background-color: #ffffff !important; }
             
-            /* Badge & Total Lebih Padat */
-            .pill-lunas { background-color: #22c55e; color: white; padding: 2px 0; border-radius: 3px; font-size: 7px; font-weight: 800; display: inline-block; text-align: center; width: 32px; }
-            .pill-libur { background-color: #ef4444; color: white; padding: 2px 0; border-radius: 3px; font-size: 7px; font-weight: 800; display: inline-block; text-align: center; width: 32px; }
-            .pill-empty { background-color: #ffffff; color: #cbd5e1; padding: 2px 0; border-radius: 3px; font-size: 7px; font-weight: 800; display: inline-block; border: 1px solid #e2e8f0; text-align: center; width: 32px; }
+            /* Badge Minimalis Lingkaran */
+            .badge-min { display: inline-block; width: 12px; height: 12px; line-height: 12px; text-align: center; border-radius: 50%; color: white; font-size: 7px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0 auto; }
+            .bg-min-green { background-color: #22c55e !important; }
+            .bg-min-red { background-color: #ef4444 !important; }
+            .bg-min-gray { background-color: #f1f5f9 !important; color: #94a3b8 !important; border: 1px solid #e2e8f0; }
+            
             .row-total td { background-color: #f8fafc !important; font-weight: 800; color: #0f172a; border-top: 1px solid #cbd5e1; border-bottom: none; font-size: 8px; padding: 6px 2px; }
         }
     </style>
@@ -865,7 +867,7 @@
         function cariSiswa() { const input = document.getElementById('search-siswa').value.toLowerCase(); const items = document.querySelectorAll('.item-siswa-admin'); items.forEach(item => { item.style.display = item.querySelector('.nama-siswa-admin').innerText.toLowerCase().includes(input) ? '' : 'none'; }); }
 
         // ==========================================
-        // SISTEM DIRECT DOWNLOAD PDF NATIVE (ANTI-BLANK)
+        // SISTEM DIRECT DOWNLOAD PDF NATIVE (ANTI-BLANK & MOBILE SAFE)
         // ==========================================
         function checkHighlight(cb) {
             const label = cb.closest('label'); const indicator = label.querySelector('.input-indicator');
@@ -987,13 +989,21 @@
 
             setTimeout(() => {
                 overlay.classList.add('opacity-0', 'pointer-events-none');
-                const newWin = window.open('', '_blank');
-                if(newWin) {
-                    newWin.document.write(`<html><head><title>${filename}</title><style>${document.querySelector('style').innerHTML}</style></head><body><div id="pdf-render-container">${htmlContent}</div><script>window.onload = function() { setTimeout(function(){ window.print(); window.close(); }, 300); }<\/script></body></html>`);
-                    newWin.document.close();
-                } else {
-                    sweetPop('warning', 'Terblokir Canvas!', 'Wah, Tab Barunya diblokir browser. Buka aplikasi TINTA di Tab Baru secara Fullscreen ya! 🛑');
-                }
+                
+                // Inject langsung ke dalam DOM berjalan untuk menghindari blokir popup mobile
+                const pdfContainer = document.getElementById('pdf-render-container');
+                pdfContainer.innerHTML = htmlContent;
+                
+                const originalTitle = document.title;
+                document.title = filename;
+                
+                setTimeout(() => {
+                    window.print();
+                    
+                    window.onafterprint = () => {
+                        document.title = originalTitle;
+                    };
+                }, 500); 
             }, 800); 
         }
 
@@ -1238,13 +1248,13 @@
                 const mKey = w.monthKey;
                 if (monthData[mKey]) {
                     const status = checks[w.id]; 
-                    let labelHtml = `<span class="pill-empty">-</span>`;
+                    let labelHtml = `<div class="badge-min bg-min-gray">-</div>`;
                     
                     if(status === 1) { 
-                        labelHtml = `<span class="pill-lunas">LUNAS</span>`; 
+                        labelHtml = `<div class="badge-min bg-min-green">&#10004;</div>`; 
                         monthData[mKey].total += nominal; 
                     } else if (status === 2) {
-                        labelHtml = `<span class="pill-libur">LIBUR</span>`;
+                        labelHtml = `<div class="badge-min bg-min-red">&#10006;</div>`;
                     }
                     
                     monthData[mKey].weeks.push(labelHtml);
@@ -1259,12 +1269,12 @@
                 
                 return `<tr style="background-color: ${bgBulan};">
                     <td style="text-align: left; font-weight: 800; color: #0f172a; padding: 4px 6px;">${m} <br><span style="font-size:6px; color:#64748b;">${yearLabel}</span></td>
-                    <td>${d.weeks[0]||`<span class="pill-empty">-</span>`}</td>
-                    <td>${d.weeks[1]||`<span class="pill-empty">-</span>`}</td>
-                    <td>${d.weeks[2]||`<span class="pill-empty">-</span>`}</td>
-                    <td>${d.weeks[3]||`<span class="pill-empty">-</span>`}</td>
-                    <td>${d.weeks[4]||`<span class="pill-empty">-</span>`}</td>
-                    <td style="text-align: center; padding-right: 4px;">${totalRowStr}</td>
+                    <td>${d.weeks[0]||`<div class="badge-min bg-min-gray">-</div>`}</td>
+                    <td>${d.weeks[1]||`<div class="badge-min bg-min-gray">-</div>`}</td>
+                    <td>${d.weeks[2]||`<div class="badge-min bg-min-gray">-</div>`}</td>
+                    <td>${d.weeks[3]||`<div class="badge-min bg-min-gray">-</div>`}</td>
+                    <td>${d.weeks[4]||`<div class="badge-min bg-min-gray">-</div>`}</td>
+                    <td style="text-align: right; padding-right: 6px;">${totalRowStr}</td>
                 </tr>`;
             }
 
@@ -1312,10 +1322,10 @@
 
             const tableHeaderInfaq = `
                 <thead>
-                    <tr>
-                        <th style="width: 15%; text-align: left; padding-left: 6px;">Bulan</th>
-                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th>
-                        <th style="width: 15%; text-align: center;">Total</th>
+                    <tr style="border-bottom: 2px solid #1e3a8a; color: #1e3a8a;">
+                        <th style="width: 20%; text-align: left; padding-left: 6px;">Bulan</th>
+                        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                        <th style="width: 25%; text-align: right; padding-right: 6px;">Total</th>
                     </tr>
                 </thead>`;
 
@@ -1341,11 +1351,11 @@
                         </div>
                     </div>
 
-                    <div class="legend-container" style="margin-bottom: 8px;">
+                    <div class="legend-container" style="margin-bottom: 8px; justify-content: center; width: max-content; margin-left: auto; margin-right: auto; background: #f8fafc; border-radius: 100px; padding: 6px 16px;">
                         <span style="font-size: 8px; font-weight: 900; color: #1e293b; margin-right: 4px;">KETERANGAN STATUS:</span>
-                        <div class="legend-item"><div class="legend-box" style="background-color: #22c55e;"></div> Infaq (Masuk)</div>
-                        <div class="legend-item"><div class="legend-box" style="background-color: #ef4444;"></div> Libur</div>
-                        <div class="legend-item"><div class="legend-box" style="background-color: #ffffff; border: 1px solid #cbd5e1;"></div> Belum Infaq</div>
+                        <div class="legend-item" style="margin-right: 8px;"><div class="badge-min bg-min-green">&#10004;</div> <span style="color:#64748b; margin-left:2px;">Lunas</span></div>
+                        <div class="legend-item" style="margin-right: 8px;"><div class="badge-min bg-min-red">&#10006;</div> <span style="color:#64748b; margin-left:2px;">Libur</span></div>
+                        <div class="legend-item"><div class="badge-min bg-min-gray">-</div> <span style="color:#64748b; margin-left:2px;">Belum</span></div>
                     </div>
                     
                     <div class="student-badge">
@@ -1353,16 +1363,16 @@
                     </div>
                     
                     <!-- TABEL 2 KOLOM RAPI DENGAN GARIS TENGAH LEGA -->
-                    <div style="display: flex; justify-content: space-between; position: relative; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; position: relative; gap: 10px;">
                         <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1.5px; background-color: #cbd5e1; transform: translateX(-50%); z-index: 0;"></div>
                         
-                        <div style="width: 48%; position: relative; z-index: 1;">
+                        <div style="width: 49%; position: relative; z-index: 1;">
                             <table class="table-siswa" style="background: white;">
                                 ${tableHeaderInfaq}
                                 <tbody>${sem1Rows}</tbody>
                             </table>
                         </div>
-                        <div style="width: 48%; position: relative; z-index: 1;">
+                        <div style="width: 49%; position: relative; z-index: 1;">
                             <table class="table-siswa" style="background: white;">
                                 ${tableHeaderInfaq}
                                 <tbody>${sem2Rows}</tbody>

@@ -66,7 +66,6 @@
         .z-col { position: sticky; z-index: 20; background-color: #ffffff; background-clip: padding-box; border-bottom: 1px solid #f1f5f9; }
         .z-intersect { position: sticky; top: 0; z-index: 40; background-color: #f8fafc; background-clip: padding-box; border-bottom: 1px solid #e2e8f0; }
         
-        /* SISTEM ANTI-BOCOR STICKY SCROLL & LEBAR PRESISI */
         .pos-no { left: 0; width: 20px; min-width: 20px; max-width: 20px; }
         .pos-nama { left: 20px; width: 95px; min-width: 95px; max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .pos-total { left: 115px; width: 55px; min-width: 55px; max-width: 55px; box-shadow: inset -1px 0 0 #e2e8f0, 2px 0 4px -2px rgba(0,0,0,0.08); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
@@ -133,7 +132,7 @@
             .val-zero { color: #cbd5e1 !important; }
             .val-bold { font-weight: 800; color: #1e3a8a; }
             
-            /* Table Persiswa (Walas) - Layout 2 Kolom Kiri-Kanan Minimalis */
+            /* Table Persiswa (Walas) - Layout 2 Kolom Kiri-Kanan */
             .table-siswa { width: 100%; border-collapse: collapse; font-size: 7.5px; text-align: center; }
             .table-siswa th { padding: 4px 1px; color: #475569; font-weight: 800; border-bottom: 1px solid #e2e8f0; font-size: 7px; text-align: center; }
             .table-siswa td { padding: 3px 1px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
@@ -635,12 +634,10 @@
             document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="data:application/manifest+json;charset=utf-8,${encodeURIComponent(manifestStr)}">`);
 
             if ('serviceWorker' in navigator) {
-                // Koneksi ke sw.js milik repo dengan penangkap error diam (silent catch)
                 navigator.serviceWorker.register('sw.js').catch(e => console.log("PWA Engine Bypassed Silently"));
             }
         } catch(e) {}
 
-        // KUNCI LEVEL DEWA: Hanya memunculkan PopUp JIKA browser mengirimkan sinyal "SIAP INSTALL"
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -683,7 +680,6 @@
                     deferredPrompt = null;
                 });
             } else {
-                // FALLBACK JIKA DIBLOKIR BROWSER (MISAL DI GITHUB PAGES / IOS)
                 sweetPop('warning', 'Install Instan Diblokir!', ['Browser Anda menolak install otomatis.', 'Silakan klik tombol [Titik 3] di atas kanan atau [Share] di bawah, lalu pilih "Tambahkan ke Layar Utama".']);
                 document.getElementById('install-popup-overlay').classList.add('opacity-0', 'pointer-events-none');
             }
@@ -768,8 +764,17 @@
         }
 
         async function fetchGAS(payload) {
-            try { const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }); return await response.json(); } 
-            catch (error) { return { status: "error", message: "Gagal terhubung ke server TINTA." }; }
+            try { 
+                const response = await fetch(GAS_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // Kunci anti CORS dan preflight!
+                }); 
+                return await response.json(); 
+            } catch (error) { 
+                console.error("Fetch GAS Error:", error);
+                return { status: "error", message: "Gagal terhubung ke server TINTA." }; 
+            }
         }
 
         async function initApp() {
@@ -946,13 +951,6 @@
 
             body.innerHTML = `
                 <div class="flex flex-col h-full max-h-[70vh]">
-                    <button onclick="prosesCetakWalasRekap(false)" class="w-full bg-[#1e3a8a] text-white py-3.5 rounded-xl font-black text-[11px] md:text-[12px] shadow-md hover:bg-blue-900 transition flex items-center justify-center gap-2 cursor-pointer mb-5"><i class="fa-solid fa-print text-[14px]"></i> 1. CETAK REKAP SELURUH KELAS</button>
-                    
-                    <div class="relative flex items-center justify-center mb-5">
-                        <div class="border-t border-slate-200 w-full"></div>
-                        <span class="bg-white px-3 text-[9px] font-black text-slate-400 uppercase tracking-widest absolute">Atau Cetak Persiswa</span>
-                    </div>
-
                     <div class="mb-3 flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <span class="text-[11px] md:text-[12px] font-black text-slate-700">PILIH SEMUA SISWA</span>
                         <input type="checkbox" class="w-5 h-5 accent-orange-600 rounded cursor-pointer" id="cb-walas-all" onchange="toggleAllWalasPrint(this.checked)">
@@ -962,8 +960,8 @@
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-2">
-                        <button onclick="prosesCetakWalasRekap(true)" class="w-full md:w-1/2 bg-white text-[#1e3a8a] border-2 border-[#1e3a8a] py-3 rounded-xl font-black text-[10px] md:text-[11px] shadow-sm hover:bg-blue-50 transition flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-table text-[14px]"></i> REKAP SESUAI CENTANG</button>
-                        <button onclick="prosesCetakWalasSiswa()" class="w-full md:w-1/2 bg-[#ea580c] text-white py-3 rounded-xl font-black text-[10px] md:text-[11px] shadow-md hover:bg-orange-700 transition flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-file-pdf text-[14px]"></i> 2. CETAK LAPORAN SISWA</button>
+                        <button onclick="prosesCetakWalasRekap()" class="w-full md:w-1/2 bg-[#1e3a8a] text-white py-3 rounded-xl font-black text-[10px] md:text-[11px] shadow-sm hover:bg-blue-900 transition flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-table text-[14px]"></i> 1. REKAP KELAS</button>
+                        <button onclick="prosesCetakWalasSiswa()" class="w-full md:w-1/2 bg-[#ea580c] text-white py-3 rounded-xl font-black text-[10px] md:text-[11px] shadow-md hover:bg-orange-700 transition flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-file-pdf text-[14px]"></i> 2. LAPORAN SISWA</button>
                     </div>
                 </div>
             `;
@@ -987,23 +985,25 @@
             
             await preloadImagesAndPrint();
 
+            // SAME-TAB PRINTING ANTI-ERROR
+            const pdfContainer = document.getElementById('pdf-render-container');
+            pdfContainer.innerHTML = htmlContent;
+            
+            const originalTitle = document.title;
+            document.title = filename;
+
             setTimeout(() => {
                 overlay.classList.add('opacity-0', 'pointer-events-none');
                 
-                // Inject langsung ke dalam DOM berjalan untuk menghindari blokir popup mobile
-                const pdfContainer = document.getElementById('pdf-render-container');
-                pdfContainer.innerHTML = htmlContent;
-                
-                const originalTitle = document.title;
-                document.title = filename;
-                
+                // Jeda sebentar agar browser HP siap merender DOM sebelum print
                 setTimeout(() => {
                     window.print();
-                    
-                    window.onafterprint = () => {
-                        document.title = originalTitle;
-                    };
-                }, 500); 
+                }, 500);
+                
+                window.onafterprint = () => {
+                    document.title = originalTitle;
+                    // pdfContainer.innerHTML = ''; // Keep it so android has time to spool
+                };
             }, 800); 
         }
 
@@ -1021,14 +1021,11 @@
             executeNativePrint(filename, finalHTML);
         }
 
-        async function prosesCetakWalasRekap(hanyaCentang) {
-            let selectedIndices = null;
-            if (hanyaCentang) {
-                const cbs = document.querySelectorAll('.cb-walas-print:checked');
-                if (cbs.length === 0) return sweetPop('warning', 'Pilih Siswa Dulu!', 'Belum ada siswa yang dicentang boss! Centang dulu minimal 1 siswa. 🖨️');
-                selectedIndices = [];
-                cbs.forEach(cb => selectedIndices.push(parseInt(cb.value)));
-            }
+        async function prosesCetakWalasRekap() {
+            const cbs = document.querySelectorAll('.cb-walas-print:checked');
+            if (cbs.length === 0) return sweetPop('warning', 'Pilih Siswa Dulu!', 'Belum ada siswa yang dicentang boss! Centang dulu minimal 1 siswa. 🖨️');
+            let selectedIndices = [];
+            cbs.forEach(cb => selectedIndices.push(parseInt(cb.value)));
 
             let filename = `Laporan_Rekap_Infaq_Kelas_${kelasWalasAktif}`;
             await fetchKelasData(kelasWalasAktif); 
@@ -1572,10 +1569,11 @@
                         iconHtml = '<span class="text-slate-300 font-bold">-</span>';
                     }
                     
-                    boxesHtml += `<div class="w-[56px] min-w-[56px] ${boxClass} border rounded-xl flex flex-col items-center justify-center p-2 h-[70px] transition-transform hover:scale-105 cursor-default"><span class="text-[14px] font-black ${textClass}">${w.dateNum}</span><div class="mt-1 flex items-center justify-center h-[18px]">${iconHtml}</div></div>`;
+                    // Gunakan flex-wrap agar otomatis turun ke bawah jika layar HP kekecilan (Anti Terpotong)
+                    boxesHtml += `<div class="w-[56px] min-w-[56px] flex-shrink-0 ${boxClass} border rounded-xl flex flex-col items-center justify-center p-2 h-[70px] transition-transform hover:scale-105 cursor-default"><span class="text-[14px] font-black ${textClass}">${w.dateNum}</span><div class="mt-1 flex items-center justify-center h-[18px]">${iconHtml}</div></div>`;
                 });
                 
-                htmlCalendar += `<div class="bg-white border border-slate-100 rounded-2xl p-4 md:p-5 shadow-sm relative"><div class="bg-[#1e3a8a] text-white text-[10px] md:text-[11px] font-black uppercase px-3.5 py-2 rounded-lg inline-block mb-3.5 shadow-md">${month}</div><div class="flex gap-2.5 overflow-x-auto custom-scrollbar pb-2 md:flex-wrap md:overflow-visible">${boxesHtml}</div></div>`;
+                htmlCalendar += `<div class="bg-white border border-slate-100 rounded-2xl p-4 md:p-5 shadow-sm relative"><div class="bg-[#1e3a8a] text-white text-[10px] md:text-[11px] font-black uppercase px-3.5 py-2 rounded-lg inline-block mb-3.5 shadow-md">${month}</div><div class="flex flex-wrap gap-2.5 pb-2">${boxesHtml}</div></div>`;
             }
             calendarContainer.innerHTML = htmlCalendar;
         }
@@ -1595,22 +1593,22 @@
                 let html = `
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">TANGGAL PENGELUARAN</label>
-                            <input type="date" id="pengeluaran-tgl" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-[13px] font-bold outline-none focus:border-blue-500 text-slate-700" value="${new Date().toISOString().split('T')[0]}">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">TANGGAL PENGELUARAN</label>
+                            <input type="date" id="pengeluaran-tgl" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-[12px] font-bold outline-none focus:border-blue-500 text-slate-700" value="${new Date().toISOString().split('T')[0]}">
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-2">
-                                <label class="block text-[11px] font-bold text-slate-500">DAFTAR BARANG & BIAYA</label>
+                                <label class="block text-[10px] font-bold text-slate-500">DAFTAR BARANG & BIAYA</label>
                                 <button onclick="addPengeluaranRow()" class="text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded border border-blue-100 text-[10px] font-bold flex items-center gap-1.5 hover:bg-blue-100 transition"><i class="fa-solid fa-plus"></i> Tambah Baris</button>
                             </div>
                             <div id="pengeluaran-rows-container" class="space-y-2 max-h-[30vh] overflow-y-auto custom-scrollbar pr-1"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl border border-slate-100 p-4 flex justify-between items-center mt-2">
-                            <span class="text-[12px] font-black text-slate-500 uppercase">Total Keseluruhan</span>
-                            <span id="pengeluaran-total-view" class="text-[15px] font-black text-[#ea580c]">Rp 0</span>
+                            <span class="text-[11px] font-black text-slate-500 uppercase">Total Keseluruhan</span>
+                            <span id="pengeluaran-total-view" class="text-[14px] font-black text-[#ea580c]">Rp 0</span>
                         </div>
                         <div class="flex flex-col gap-2 pt-2">
-                            <button onclick="simpanPengeluaran(this)" class="w-full bg-[#1e3a8a] hover:bg-blue-900 text-white font-black py-3.5 rounded-xl text-[13px] shadow-sm transition">Simpan Catatan</button>
+                            <button onclick="simpanPengeluaran(this)" class="w-full bg-[#1e3a8a] hover:bg-blue-900 text-white font-black py-3.5 rounded-xl text-[12px] shadow-sm transition">Simpan Catatan</button>
                         </div>
                     </div>
                 `;
@@ -1624,7 +1622,7 @@
         function renderPengeluaranRows() {
             const container = document.getElementById('pengeluaran-rows-container'); let html = '';
             tempPengeluaranRows.forEach((row, i) => {
-                html += `<div class="flex gap-2 dynamic-input-row"><input type="text" class="w-[65%] bg-white border border-slate-200 rounded-lg p-2.5 text-[12px] outline-none focus:border-blue-500 placeholder-slate-300" placeholder="Contoh: Sapu & Spidol" value="${row.ket}" onchange="tempPengeluaranRows[${i}].ket = this.value"><input type="number" class="w-[35%] bg-white border border-slate-200 rounded-lg p-2.5 text-[12px] font-black outline-none focus:border-blue-500 text-right" placeholder="Rp" value="${row.nom}" oninput="tempPengeluaranRows[${i}].nom = this.value; hitungTotalPengeluaran();"></div>`;
+                html += `<div class="flex gap-2 dynamic-input-row"><input type="text" class="w-[65%] bg-white border border-slate-200 rounded-lg p-2.5 text-[11px] outline-none focus:border-blue-500 placeholder-slate-300" placeholder="Contoh: Sapu & Spidol" value="${row.ket}" onchange="tempPengeluaranRows[${i}].ket = this.value"><input type="number" class="w-[35%] bg-white border border-slate-200 rounded-lg p-2.5 text-[11px] font-black outline-none focus:border-blue-500 text-right" placeholder="Rp" value="${row.nom}" oninput="tempPengeluaranRows[${i}].nom = this.value; hitungTotalPengeluaran();"></div>`;
             });
             container.innerHTML = html; hitungTotalPengeluaran();
         }
@@ -1650,11 +1648,11 @@
 
         function renderRiwayatList() {
             const body = document.getElementById('modal-body');
-            let html = `<div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex flex-col max-h-[50vh]"><div class="grid grid-cols-12 bg-slate-50 p-3 border-b border-slate-100 text-[10px] md:text-[11px] font-black text-slate-500"><span class="col-span-3 text-center">TANGGAL</span><span class="col-span-5 text-left">KEPERLUAN</span><span class="col-span-4 text-right pr-2">BIAYA</span></div><div class="overflow-y-auto custom-scrollbar flex-1 divide-y divide-slate-50">`;
+            let html = `<div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex flex-col max-h-[50vh]"><div class="grid grid-cols-12 bg-slate-50 p-3 border-b border-slate-100 text-[9px] font-black text-slate-500"><span class="col-span-3 text-center">TANGGAL</span><span class="col-span-5 text-left">KEPERLUAN</span><span class="col-span-4 text-right pr-2">BIAYA</span></div><div class="overflow-y-auto custom-scrollbar flex-1 divide-y divide-slate-50">`;
             const history = DB.riwayatPengeluaran[kelasWalasAktif] || [];
-            if (history.length === 0) { html += `<div class="text-center text-slate-400 text-[11px] md:text-[12px] py-6 font-bold">Belum ada pengeluaran.</div>`; } 
-            else { history.forEach((item, index) => { html += `<div class="grid grid-cols-12 p-3 items-center hover:bg-slate-50 transition"><span class="col-span-3 text-center text-[11px] md:text-[12px] font-bold text-slate-500">${item.date}</span><span class="col-span-5 text-left text-[12px] md:text-[13px] font-black text-slate-700 truncate pr-2">${item.ket}</span><div class="col-span-4 flex items-center justify-end gap-2"><span class="text-[12px] md:text-[13px] font-black text-red-600">${formatRp(item.amount)}</span><button onclick="hapusRiwayat(${index})" class="w-7 h-7 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition"><i class="fa-solid fa-trash-can text-[10px]"></i></button></div></div>`; }); }
-            html += `</div></div><button onclick="kosongkanRiwayat()" class="w-full mt-4 bg-red-50 hover:bg-red-100 text-red-600 font-black py-3.5 rounded-xl text-[12px] md:text-[13px] transition flex justify-center items-center gap-1.5 border border-red-100"><i class="fa-solid fa-trash-can"></i> Kosongkan Riwayat Pengeluaran</button>`;
+            if (history.length === 0) { html += `<div class="text-center text-slate-400 text-[10px] py-6 font-bold">Belum ada pengeluaran.</div>`; } 
+            else { history.forEach((item, index) => { html += `<div class="grid grid-cols-12 p-3 items-center hover:bg-slate-50 transition"><span class="col-span-3 text-center text-[10px] font-bold text-slate-500">${item.date}</span><span class="col-span-5 text-left text-[11px] font-black text-slate-700 truncate pr-2">${item.ket}</span><div class="col-span-4 flex items-center justify-end gap-2"><span class="text-[11px] font-black text-red-600">${formatRp(item.amount)}</span><button onclick="hapusRiwayat(${index})" class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition"><i class="fa-solid fa-trash-can text-[9px]"></i></button></div></div>`; }); }
+            html += `</div></div><button onclick="kosongkanRiwayat()" class="w-full mt-4 bg-red-50 hover:bg-red-100 text-red-600 font-black py-3.5 rounded-xl text-[11px] transition flex justify-center items-center gap-1.5 border border-red-100"><i class="fa-solid fa-trash-can"></i> Kosongkan Riwayat Pengeluaran</button>`;
             body.innerHTML = html;
         }
 
@@ -1710,42 +1708,120 @@
             body.innerHTML = html; modal.classList.add('active');
         }
 
-        // --- UPLOAD EXCEL HANDLER ---
+        // --- UPLOAD EXCEL HANDLER (SMART PARSING) ---
         function handleFileUpload(e) {
             const file = e.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(event) {
-                const data = new Uint8Array(event.target.result); const workbook = XLSX.read(data, {type: 'array'});
-                let dataWalas = []; if(workbook.Sheets["DATA_WALAS"]) { dataWalas = XLSX.utils.sheet_to_json(workbook.Sheets["DATA_WALAS"]); }
-                let dataSiswa = []; if(workbook.Sheets["DATA_SISWA"]) { dataSiswa = XLSX.utils.sheet_to_json(workbook.Sheets["DATA_SISWA"]); }
-                excelPayload = { action: "uploadMaster", dataWalas: dataWalas.map(w => ({kelas: w.KELAS, nama: w['NAMA GURU'], password: w.PASSWORD, nominal: w.NOMINAL || 50000})), dataSiswa: dataSiswa.map(s => ({kelas: s.KELAS, no_presensi: s['NO PRESENSI'], nama: s['NAMA SISWA'], password: s.PASSWORD})) };
-                sweetPop('success', 'File Ditemukan!', 'Dokumen udah siap dieksekusi bos!');
+                try {
+                    const data = new Uint8Array(event.target.result); 
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    let dataWalas = []; 
+                    if(workbook.Sheets["DATA_WALAS"]) { 
+                        dataWalas = XLSX.utils.sheet_to_json(workbook.Sheets["DATA_WALAS"]); 
+                    }
+                    
+                    let dataSiswa = []; 
+                    if(workbook.Sheets["DATA_SISWA"]) { 
+                        dataSiswa = XLSX.utils.sheet_to_json(workbook.Sheets["DATA_SISWA"]); 
+                    }
+                    
+                    // Filter Baris Kosong & Huruf Kapital
+                    const cleanWalas = dataWalas.map(w => {
+                        let obj = {}; for(let k in w) obj[k.trim().toUpperCase()] = w[k];
+                        return { 
+                            kelas: String(obj['KELAS']||'').trim(), 
+                            nama: String(obj['NAMA GURU']||'').trim(), 
+                            password: String(obj['PASSWORD']||'123456'), 
+                            nominal: parseInt(obj['NOMINAL']) || 50000 
+                        };
+                    }).filter(w => w.kelas !== "");
+
+                    const cleanSiswa = dataSiswa.map(s => {
+                        let obj = {}; for(let k in s) obj[k.trim().toUpperCase()] = s[k];
+                        return { 
+                            kelas: String(obj['KELAS']||'').trim(), 
+                            no_presensi: parseInt(obj['NO PRESENSI']) || 0, 
+                            nama: String(obj['NAMA SISWA']||'').trim(), 
+                            password: String(obj['PASSWORD']||'123456') 
+                        };
+                    }).filter(s => s.kelas !== "" && s.nama !== "");
+
+                    if (cleanWalas.length === 0 && cleanSiswa.length === 0) {
+                        return sweetPop('error', 'Data Kosong!', 'File Excel sepertinya kosong atau formatnya tidak sesuai template.');
+                    }
+
+                    excelPayload = { action: "uploadMaster", dataWalas: cleanWalas, dataSiswa: cleanSiswa };
+                    sweetPop('success', 'File Ditemukan!', 'Dokumen udah siap dieksekusi bos!');
+                } catch(err) {
+                    console.error(err);
+                    sweetPop('error', 'Gagal Membaca', 'Format file Excel tidak valid.');
+                }
             };
             reader.readAsArrayBuffer(file);
         }
 
         async function prosesSyncExcel(btn) {
-            if(!excelPayload) return sweetPop('error', 'Kosong Nih!', 'Pilih file Excelnya dulu dong, masa sinkron udara? 😂');
+            if(!excelPayload) return sweetPop('warning', 'Kosong Nih!', 'Pilih file Excelnya dulu dong, masa sinkron udara? 😂');
             
+            const originalText = btn.innerHTML;
             const texts = ["MENGUNGGAH...", "MENYUSUN KELAS...", "MENYIMPAN DATA..."];
             let tIdx = 0;
             const intervalAnim = setInterval(() => {
-                btn.innerHTML = `<div class="loader w-4 h-4 border-t-white border-[2px] mr-2"></div> ${texts[tIdx]}`;
+                btn.innerHTML = `<div class="loader w-3 h-3 border-t-white border-[2px] mr-2"></div> ${texts[tIdx]}`;
                 tIdx = (tIdx + 1) % texts.length;
-            }, 2000);
+            }, 1500);
             
             btn.disabled = true;
 
             const res = await fetchGAS(excelPayload);
-            
             clearInterval(intervalAnim);
             
             if(res.status === 'success') {
-                if (excelPayload.dataWalas) { excelPayload.dataWalas.forEach(w => { if(w.nominal) DB.nominalDefault[w.kelas] = parseInt(w.nominal) || 50000; }); }
-                sweetPop('success', 'Beres Bos!', 'Data master udah sinkron semua, siap gas! 🎉'); closeModal();
-            } else { sweetPop('error', 'Yah Gagal...', 'Gagal Sinkronisasi nih, periksa koneksi! 😭'); }
+                // Update Local Memory Langsung Instan!
+                DB.guru = {}; DB.walasPassword = {}; DAFTAR_KELAS.length = 0; DB.siswa = {}; checklistState = {};
+                
+                excelPayload.dataWalas.forEach(w => {
+                    DB.guru[w.kelas] = w.nama;
+                    DB.walasPassword[w.kelas] = w.password;
+                    DB.nominalDefault[w.kelas] = w.nominal;
+                    if(!DAFTAR_KELAS.includes(w.kelas)) DAFTAR_KELAS.push(w.kelas);
+                });
+                
+                excelPayload.dataSiswa.forEach(s => {
+                    if(!DB.siswa[s.kelas]) DB.siswa[s.kelas] = [];
+                    DB.siswa[s.kelas].push({ nama: s.nama, pin: s.password, no: s.no_presensi, infaq: 0 });
+                    if(!DAFTAR_KELAS.includes(s.kelas)) DAFTAR_KELAS.push(s.kelas);
+                });
+                
+                DAFTAR_KELAS.sort();
+                
+                // Refresh Selectors UI
+                const selectSummary = document.getElementById('summary-kelas-select');
+                let htmlSelect = '<option value="">Pilih Kelas</option>';
+                DAFTAR_KELAS.forEach(k => htmlSelect += `<option value="${k}">${k}</option>`);
+                if(selectSummary) selectSummary.innerHTML = htmlSelect;
+
+                const containerWalas = document.getElementById('list-kelas-walas-container');
+                const containerWarid = document.getElementById('list-kelas-warid-container');
+                if(containerWalas && containerWarid) {
+                    let htmlKelas = ''; DAFTAR_KELAS.forEach(k => { htmlKelas += `<div class="custom-option" onclick="selectOption('dropdown-kelas-walas', '${k}', 'text-kelas-walas')">${k}</div>`; });
+                    containerWalas.innerHTML = htmlKelas; htmlKelas = '';
+                    DAFTAR_KELAS.forEach(k => { htmlKelas += `<div class="custom-option" onclick="selectOption('dropdown-kelas-warid', '${k}', 'text-kelas-warid')">${k}</div>`; });
+                    containerWarid.innerHTML = htmlKelas;
+                }
+
+                updateDashboardView();
+                sweetPop('success', 'Beres Bos!', 'Data master udah sinkron semua, siap gas! 🎉'); 
+                closeModal();
+            } else { 
+                sweetPop('error', 'Yah Gagal...', 'Gagal Sinkronisasi nih, periksa koneksi! 😭'); 
+            }
             
-            btn.innerHTML = `SINKRONISASI SEKARANG`; btn.disabled = false;
+            btn.innerHTML = originalText; 
+            btn.disabled = false;
+            excelPayload = null;
         }
 
         async function manageAkun(subType) {
@@ -1806,19 +1882,19 @@
             DAFTAR_KELAS.forEach(k => {
                 if (DB.guru[k]) {
                     html += `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[12px] font-black text-slate-800">Kelas ${k}</span>
-                            <button onclick="hapusWalas('${k}')" class="w-7 h-7 rounded-lg bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition cursor-pointer"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[11px] font-black text-slate-800">Kelas ${k}</span>
+                            <button onclick="hapusWalas('${k}')" class="w-6 h-6 rounded bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition cursor-pointer"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                         </div>
-                        <div class="flex gap-2.5">
-                            <input type="text" class="w-[60%] border border-slate-200 rounded-lg p-2 text-[11px] md:text-[12px] outline-none focus:border-blue-500" value="${DB.guru[k]}" onchange="DB.guru['${k}'] = this.value">
-                            <input type="text" class="w-[40%] border border-slate-200 rounded-lg p-2 text-[11px] md:text-[12px] outline-none focus:border-blue-500 text-center font-black" value="${DB.walasPassword ? (DB.walasPassword[k] || '123456') : '123456'}" onchange="if(!DB.walasPassword) DB.walasPassword={}; DB.walasPassword['${k}'] = this.value">
+                        <div class="flex gap-2">
+                            <input type="text" class="w-[60%] border border-slate-200 rounded p-1.5 text-[10px] outline-none focus:border-blue-500" value="${DB.guru[k]}" onchange="DB.guru['${k}'] = this.value">
+                            <input type="text" class="w-[40%] border border-slate-200 rounded p-1.5 text-[10px] outline-none focus:border-blue-500 text-center font-black" value="${DB.walasPassword ? (DB.walasPassword[k] || '123456') : '123456'}" onchange="if(!DB.walasPassword) DB.walasPassword={}; DB.walasPassword['${k}'] = this.value">
                         </div>
                     </div>`;
                 }
             });
-            if(html === '') html = '<div class="text-center text-slate-400 text-[11px] font-bold p-5">Belum ada Wali Kelas aktif.</div>';
+            if(html === '') html = '<div class="text-center text-slate-400 text-[10px] font-bold p-4">Belum ada Wali Kelas aktif.</div>';
             document.getElementById('list-walas-aktif').innerHTML = html;
         }
 
@@ -1856,20 +1932,20 @@
             if(!kelas){ c.innerHTML = ''; if(formAdd) formAdd.classList.add('hidden'); if(btnSave) btnSave.classList.add('hidden'); return; } 
             
             if(formAdd) formAdd.classList.remove('hidden'); if(btnSave) btnSave.classList.remove('hidden');
-            c.innerHTML = `<div class="p-6 text-center text-slate-400 text-[11px] font-bold"><i class="fa-solid fa-circle-notch fa-spin"></i> Memuat data...</div>`;
+            c.innerHTML = `<div class="p-4 text-center text-slate-400 text-[10px] font-bold"><i class="fa-solid fa-circle-notch fa-spin"></i> Memuat data...</div>`;
             await fetchKelasData(kelas);
 
             let h=''; 
             (DB.siswa[kelas]||[]).forEach((s,i) => { 
-                h+=`<div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-blue-200 transition">
-                    <span class="text-[12px] md:text-[13px] font-bold text-slate-700 truncate w-[55%] pl-1">${String(s.no || i+1).padStart(2, '0')}. ${s.nama || s.class}</span>
-                    <div class="flex gap-2 w-[45%] justify-end">
-                        <input class="w-full max-w-[85px] bg-white border border-slate-200 rounded-lg p-1.5 text-center text-[11px] md:text-[12px] font-black outline-none focus:border-blue-500 transition-colors" value="${s.pin || '123456'}" onchange="updatePinSiswa('${kelas}', ${i}, this.value)">
-                        <button class="w-8 h-8 flex-shrink-0 rounded-lg bg-red-50 text-red-500 border border-red-200 flex items-center justify-center hover:bg-red-100 transition-colors cursor-pointer" onclick="hapusSiswa('${kelas}',${i})"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
+                h+=`<div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 hover:border-blue-200 transition">
+                    <span class="text-[11px] font-bold text-slate-700 truncate w-[55%] pl-1">${String(s.no || i+1).padStart(2, '0')}. ${s.nama || s.class}</span>
+                    <div class="flex gap-1.5 w-[45%] justify-end">
+                        <input class="w-full max-w-[80px] bg-white border border-slate-200 rounded-lg p-1.5 text-center text-[10px] font-black outline-none focus:border-blue-500 transition-colors" value="${s.pin || '123456'}" onchange="updatePinSiswa('${kelas}', ${i}, this.value)">
+                        <button class="w-7 h-7 flex-shrink-0 rounded-lg bg-red-50 text-red-500 border border-red-200 flex items-center justify-center hover:bg-red-100 transition-colors cursor-pointer" onclick="hapusSiswa('${kelas}',${i})"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                     </div>
                 </div>`; 
             }); 
-            if(h === '') h = `<div class="p-6 text-center text-slate-400 text-[11px] font-bold">Belum ada siswa di kelas ini.</div>`;
+            if(h === '') h = `<div class="p-4 text-center text-slate-400 text-[10px] font-bold">Belum ada siswa di kelas ini.</div>`;
             c.innerHTML = h; 
         }
 
@@ -1928,11 +2004,45 @@
 
         function closeModal() { document.getElementById('global-modal').classList.remove('active'); document.getElementById('modal-title').classList.replace('text-red-600', 'text-[#1e3a8a]'); }
         
-        function prosesReset() { 
+        function downloadTemplateExcel(btn) {
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-sm"></i>`;
+            setTimeout(() => {
+                const wb = XLSX.utils.book_new();
+                const wsWalas = XLSX.utils.json_to_sheet([
+                    { "KELAS": "1A", "NAMA GURU": "Budi Santoso", "PASSWORD": "123", "NOMINAL": 50000 },
+                    { "KELAS": "1B", "NAMA GURU": "Siti Aminah", "PASSWORD": "123", "NOMINAL": 50000 }
+                ]);
+                XLSX.utils.book_append_sheet(wb, wsWalas, "DATA_WALAS");
+                
+                const wsSiswa = XLSX.utils.json_to_sheet([
+                    { "KELAS": "1A", "NO PRESENSI": 1, "NAMA SISWA": "Andi Pratama", "PASSWORD": "123" },
+                    { "KELAS": "1A", "NO PRESENSI": 2, "NAMA SISWA": "Budi Gunawan", "PASSWORD": "123" },
+                    { "KELAS": "1B", "NO PRESENSI": 1, "NAMA SISWA": "Cahya Ramadhan", "PASSWORD": "123" }
+                ]);
+                XLSX.utils.book_append_sheet(wb, wsSiswa, "DATA_SISWA");
+                
+                XLSX.writeFile(wb, "Template_MasterData_TINTA.xlsx");
+                btn.innerHTML = `UNDUH`;
+                sweetPop('success', 'Berhasil Diunduh!', 'File template Excel berhasil didownload. Silakan isi dan unggah kembali!');
+            }, 500);
+        }
+
+        async function prosesReset() { 
             if(document.getElementById('reset-confirm').value !== 'RESET') return sweetPop('error', 'Salah Ketik!', 'Ketik RESET yang bener dong biar afdol! 😜'); 
+            
+            const btn = document.querySelector('#global-modal button.bg-red-600');
+            if(btn) { btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MENGHAPUS...`; btn.disabled = true; }
+
             for(let k in DB.siswa) { DB.siswa[k]=[]; DB.pengeluaran[k]=0; DB.riwayatPengeluaran[k]=[]; checklistState[k]={}; } 
+            DB.guru = {}; DB.walasPassword = {}; 
+            
+            DAFTAR_KELAS.length = 0;
+            ["1A", "1B", "1C", "1D", "1 ICP A", "1 ICP B", "2A", "2B", "2C", "2D", "2 ICP A", "2 ICP B", "3A", "3B", "3C", "3D", "3 ICP A", "4A", "4B", "4C", "4D", "5A", "5B", "5C", "5D", "6A", "6B", "6C", "6D"].forEach(k => { DAFTAR_KELAS.push(k); DB.nominalDefault[k] = 50000; });
+
+            await fetchGAS({ action: "uploadMaster", dataWalas: [], dataSiswa: [] });
+
             updateDashboardView(); closeModal(); 
-            sweetPop('success', 'Tersapu Bersih!', 'Sistem kembali suci seperti bayi baru lahir! 👼'); 
+            sweetPop('success', 'Tersapu Bersih!', 'Sistem kembali suci seperti bayi baru lahir. Data Server dan Lokal telah dibersihkan! 👼'); 
         }
 
         async function globalRefresh() {
@@ -2054,6 +2164,9 @@
             if(roleName === 'Wali Kelas' && !selectedKelasWalas) return sweetPop('warning', 'Eits, Tunggu Dulu!', ['Pilih kelasnya dulu dong bos, masa mau ngawang? 👻', 'Kelasnya belum dipilih tuh, buru-buru amat!']);
             if(roleName === 'Wali Murid' && (!selectedKelasWarid || !selectedSiswaWarid)) return sweetPop('warning', 'Eits, Tunggu Dulu!', ['Pilih Kelas & Siswanya dulu yaa! 👻', 'Data anaknya belum dipilih nih, cek lagi ya!']);
 
+            const btn = e.target.querySelector('button[type="submit"]'); const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> MEMPROSES...'; btn.disabled = true;
+
             const password = document.getElementById(roleName === 'Administrator' ? 'pin-admin' : (roleName === 'Wali Kelas' ? 'pin-walas' : 'pin-warid')).value;
 
             let isSuccess = false; let namaGuru = "";
@@ -2070,27 +2183,32 @@
             }
 
             if (isSuccess) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> AKSES DIBERIKAN'; btn.style.backgroundColor = '#10b981'; 
                 if (roleName === 'Wali Kelas') DB.guru[selectedKelasWalas] = namaGuru;
 
-                const loginView = document.getElementById('view-login'); let dashView = null;
-                
-                if (roleName === 'Administrator') dashView = document.getElementById('view-dashboard-admin');
-                else if (roleName === 'Wali Kelas') { 
-                    dashView = document.getElementById('view-dashboard-walas'); 
-                    initDashboardWalas(selectedKelasWalas); 
-                    fetchKelasData(selectedKelasWalas).then(() => { renderChecklistWalas(); calcStatsWalas(); }); 
-                }
-                else if (roleName === 'Wali Murid') { 
-                    dashView = document.getElementById('view-dashboard-warid'); 
-                    const idx = DB.siswa[selectedKelasWarid].findIndex(s => s.nama === selectedSiswaWarid); 
-                    initDashboardWarid(selectedKelasWarid, idx);
-                    fetchKelasData(selectedKelasWarid).then(() => { initDashboardWarid(selectedKelasWarid, idx); });
-                }
+                setTimeout(async () => {
+                    btn.innerHTML = originalContent; btn.style.backgroundColor = ''; btn.disabled = false;
+                    const loginView = document.getElementById('view-login'); let dashView = null;
+                    
+                    if (roleName === 'Administrator') dashView = document.getElementById('view-dashboard-admin');
+                    else if (roleName === 'Wali Kelas') { 
+                        dashView = document.getElementById('view-dashboard-walas'); 
+                        initDashboardWalas(selectedKelasWalas); 
+                        fetchKelasData(selectedKelasWalas).then(() => { renderChecklistWalas(); calcStatsWalas(); }); 
+                    }
+                    else if (roleName === 'Wali Murid') { 
+                        dashView = document.getElementById('view-dashboard-warid'); 
+                        const idx = DB.siswa[selectedKelasWarid].findIndex(s => s.nama === selectedSiswaWarid); 
+                        initDashboardWarid(selectedKelasWarid, idx);
+                        fetchKelasData(selectedKelasWarid).then(() => { initDashboardWarid(selectedKelasWarid, idx); });
+                    }
 
-                loginView.classList.add('hidden'); dashView.classList.remove('hidden'); document.getElementById('btn-global-refresh').classList.remove('hidden');
-                document.body.style.backgroundColor = roleName === 'Administrator' ? '#f1f5f9' : '#f8fafc';
+                    loginView.classList.add('hidden'); dashView.classList.remove('hidden'); document.getElementById('btn-global-refresh').classList.remove('hidden');
+                    document.body.style.backgroundColor = roleName === 'Administrator' ? '#f1f5f9' : '#f8fafc';
 
+                }, 400);
             } else {
+                btn.innerHTML = originalContent; btn.disabled = false; 
                 const pesanError = [
                     'Yahahaha, kata sandinya salah nih! Lupa ingatan yak?',
                     'Eits, sandinya meleset bos! Coba pelan-pelan ngetiknya.',

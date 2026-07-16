@@ -2269,7 +2269,7 @@
                         </div>
                     </div>
                     <div class="relative mt-3">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">Password Baru (Min. 4 digit)</label>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">Password Baru (Min. 2 digit)</label>
                         <div class="premium-input rounded-xl relative border-slate-200">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-key text-blue-500 text-[11px]"></i></div>
                             <input type="password" id="cp-new" class="w-full py-3 pl-9 pr-10 text-[13px] font-black tracking-widest text-slate-700 bg-transparent outline-none rounded-xl" placeholder="••••••">
@@ -2297,7 +2297,7 @@
             const confP = document.getElementById('cp-confirm').value;
 
             if(!oldP || !newP || !confP) return sweetPop('warning', 'Masih Kosong!', 'Isi semua kolom dulu bosku! 👀');
-            if(newP.length < 4) return sweetPop('error', 'Terlalu Pendek!', 'Password baru minimal 4 karakter dong!');
+            if(newP.length < 2) return sweetPop('error', 'Terlalu Pendek!', 'Password baru minimal 2 karakter dong!');
             if(newP !== confP) return sweetPop('error', 'Tidak Cocok!', 'Konfirmasi password baru tidak sama! 😅');
 
             btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MEMPROSES...`;

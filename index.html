@@ -488,28 +488,31 @@
         <main class="p-4 lg:p-8 relative w-full mx-auto max-w-[1000px]">
             
             <div class="lg:grid lg:grid-cols-2 lg:gap-8 mb-8 items-stretch">
-                <div class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-slate-100 flex items-center justify-between mb-4 lg:mb-0 h-full">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-full border-2 border-blue-100 bg-blue-50 flex items-center justify-center text-blue-600 text-xl shadow-inner">
+                <!-- DESIGN BARU: KARTU PROFIL DIPERLEBAR DAN TOMBOL DIPISAH BARIS -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between mb-4 lg:mb-0 h-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
+                    
+                    <div class="flex items-start gap-4 relative z-10 mb-4">
+                        <div class="w-12 h-12 rounded-full border-2 border-blue-100 bg-blue-50 flex items-center justify-center text-blue-600 text-lg flex-shrink-0 shadow-inner">
                             <i class="fa-solid fa-user-graduate"></i>
                         </div>
-                        <div>
-                            <h2 id="warid-nama-siswa" class="text-[16px] lg:text-[20px] font-black text-[#1e3a8a] leading-tight">Nama Siswa</h2>
-                            <p id="warid-info-siswa" class="text-[11px] lg:text-[12px] font-bold text-slate-500 mt-1.5">Kelas -- | No Presensi: --</p>
+                        <div class="flex-1 pt-0.5">
+                            <h2 id="warid-nama-siswa" class="text-[15px] lg:text-[18px] font-black text-[#1e3a8a] leading-tight break-words pr-2">Nama Siswa Panjang Sekali</h2>
+                            <p id="warid-info-siswa" class="text-[10px] lg:text-[11px] font-bold text-slate-500 mt-1">Kelas -- | No Presensi: --</p>
                         </div>
                     </div>
-                    <div class="flex gap-2">
-                        <!-- TOMBOL GANTI PASSWORD WARID -->
-                        <button onclick="openModalGantiPassword('warid')" class="w-12 h-12 rounded-xl border border-blue-500 text-blue-500 flex items-center justify-center bg-[#eff6ff] hover:bg-blue-100 transition shadow-sm" title="Ganti Kode Akses"><i class="fa-solid fa-key text-[18px]"></i></button>
-                        <button onclick="logoutApp('view-dashboard-warid')" class="w-12 h-12 rounded-xl border border-red-500 text-red-500 flex items-center justify-center bg-[#fef2f2] hover:bg-red-100 transition shadow-sm" title="Keluar"><i class="fa-solid fa-power-off text-[18px]"></i></button>
+
+                    <div class="flex gap-2 border-t border-slate-100 pt-4 relative z-10">
+                        <button onclick="openModalGantiPassword('warid')" class="flex-1 py-2.5 rounded-xl border border-blue-200 text-blue-600 font-bold text-[10px] flex items-center justify-center gap-1.5 bg-[#eff6ff] hover:bg-blue-100 transition shadow-sm" title="Ganti Kode Akses"><i class="fa-solid fa-key text-[12px]"></i> GANTI SANDI</button>
+                        <button onclick="logoutApp('view-dashboard-warid')" class="flex-1 py-2.5 rounded-xl border border-red-200 text-red-600 font-bold text-[10px] flex items-center justify-center gap-1.5 bg-[#fef2f2] hover:bg-red-100 transition shadow-sm" title="Keluar"><i class="fa-solid fa-power-off text-[12px]"></i> KELUAR</button>
                     </div>
                 </div>
 
                 <div class="bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] rounded-2xl p-6 lg:p-8 shadow-lg relative overflow-hidden h-full flex flex-col justify-center border border-blue-800">
-                    <div class="absolute -right-4 -top-4 opacity-10 text-[120px]"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="absolute -right-4 -top-4 opacity-10 text-[120px] pointer-events-none"><i class="fa-solid fa-wallet"></i></div>
                     <p id="teks-total-ananda" class="text-[11px] font-black text-blue-200 uppercase tracking-widest mb-2 relative z-10">Total Infaq Ananda</p>
                     <h3 id="warid-total-infaq" class="text-4xl lg:text-5xl font-black text-white relative z-10 drop-shadow-md">Rp 0</h3>
-                    <div class="absolute right-6 top-1/2 transform -translate-y-1/2 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur z-10 text-2xl shadow-inner">
+                    <div class="absolute right-6 top-1/2 transform -translate-y-1/2 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur z-10 text-2xl shadow-inner pointer-events-none">
                         <i class="fa-solid fa-wallet"></i>
                     </div>
                 </div>
@@ -520,7 +523,7 @@
                 <h3 class="text-[13px] font-black text-slate-700 tracking-wider">KALENDER RIWAYAT INFAQ</h3>
             </div>
 
-            <div id="warid-calendar-container" class="space-y-5">
+            <div id="warid-calendar-container" class="space-y-4">
                 <!-- Data Bulanan Diinjeksi via JS -->
             </div>
 
@@ -1602,23 +1605,39 @@
                     let boxClass, textClass, iconHtml;
                     
                     if (state === 1) { 
-                        boxClass = "bg-green-50 border-green-200 shadow-sm";
+                        boxClass = "bg-gradient-to-b from-green-50 to-green-100/50 border-green-200 shadow-sm";
                         textClass = "text-green-700";
-                        iconHtml = `<i class="fa-solid fa-check text-green-500 text-[14px]"></i>`;
+                        iconHtml = `<div class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center shadow-inner"><i class="fa-solid fa-check text-[10px]"></i></div>`;
                     } else if (state === 2) { 
-                        boxClass = "bg-red-50 border-red-200 shadow-sm";
+                        boxClass = "bg-gradient-to-b from-red-50 to-red-100/50 border-red-200 shadow-sm";
                         textClass = "text-red-700";
-                        iconHtml = `<i class="fa-solid fa-xmark text-red-500 text-[14px]"></i>`;
+                        iconHtml = `<div class="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-inner"><i class="fa-solid fa-xmark text-[10px]"></i></div>`;
                     } else { 
-                        boxClass = "bg-slate-50 border-slate-200 shadow-sm opacity-70";
+                        boxClass = "bg-slate-50 border-slate-200 shadow-sm opacity-60";
                         textClass = "text-slate-400";
-                        iconHtml = '<span class="text-slate-300 font-bold">-</span>';
+                        iconHtml = `<div class="w-5 h-5 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-minus text-[10px]"></i></div>`;
                     }
                     
-                    boxesHtml += `<div class="w-[56px] min-w-[56px] ${boxClass} border rounded-xl flex flex-col items-center justify-center p-2 h-[70px] transition-transform hover:scale-105 cursor-default"><span class="text-[14px] font-black ${textClass}">${w.dateNum}</span><div class="mt-1 flex items-center justify-center h-[18px]">${iconHtml}</div></div>`;
+                    // NEW SLEEK BOX
+                    boxesHtml += `
+                    <div class="w-[50px] min-w-[50px] ${boxClass} border rounded-[14px] flex flex-col items-center justify-between p-1.5 h-[65px] transition-all hover:-translate-y-1">
+                        <span class="text-[13px] font-black ${textClass} mt-0.5">${w.dateNum}</span>
+                        ${iconHtml}
+                    </div>`;
                 });
                 
-                htmlCalendar += `<div class="bg-white border border-slate-100 rounded-2xl p-4 md:p-5 shadow-sm relative"><div class="bg-[#1e3a8a] text-white text-[10px] md:text-[11px] font-black uppercase px-3.5 py-2 rounded-lg inline-block mb-3.5 shadow-md">${month}</div><div class="flex gap-2.5 overflow-x-auto custom-scrollbar pb-2 md:flex-wrap md:overflow-visible">${boxesHtml}</div></div>`;
+                // NEW SLEEK MONTH CONTAINER
+                htmlCalendar += `
+                <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#1e3a8a]"></div>
+                    <div class="flex items-center gap-2 mb-3 pl-2">
+                        <i class="fa-regular fa-calendar text-blue-500 text-[12px]"></i>
+                        <h4 class="text-[#1e3a8a] text-[11px] font-black uppercase tracking-wider">${month}</h4>
+                    </div>
+                    <div class="flex gap-2.5 overflow-x-auto custom-scrollbar pb-2 pl-2">
+                        ${boxesHtml}
+                    </div>
+                </div>`;
             }
             calendarContainer.innerHTML = htmlCalendar;
         }
@@ -2045,7 +2064,6 @@
             DB.guru = {}; DB.walasPassword = {}; 
             
             DAFTAR_KELAS.length = 0;
-            ["1A", "1B", "1C", "1D", "1 ICP A", "1 ICP B", "2A", "2B", "2C", "2D", "2 ICP A", "2 ICP B", "3A", "3B", "3C", "3D", "3 ICP A", "4A", "4B", "4C", "4D", "5A", "5B", "5C", "5D", "6A", "6B", "6C", "6D"].forEach(k => { DAFTAR_KELAS.push(k); DB.nominalDefault[k] = 50000; });
 
             await fetchGAS({ action: "uploadMaster", dataWalas: [], dataSiswa: [] });
 
@@ -2231,6 +2249,9 @@
             document.getElementById('pin-admin').value = 'adminin'; document.getElementById('pin-walas').value = ''; document.getElementById('pin-warid').value = '';
         }
 
+        // ==========================================
+        // FITUR GANTI PASSWORD MANDIRI + IKON MATA
+        // ==========================================
         function openModalGantiPassword(role) {
             const modal = document.getElementById('global-modal'); const body = document.getElementById('modal-body'); const title = document.getElementById('modal-title');
             title.innerText = role === 'walas' ? "GANTI PIN WALI KELAS" : "GANTI KODE AKSES SISWA";
@@ -2305,7 +2326,6 @@
                 btn.innerHTML = `SIMPAN PASSWORD`; btn.disabled = false;
             }
         }
-
 
         initApp();
     </script>

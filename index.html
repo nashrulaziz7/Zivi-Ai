@@ -412,7 +412,8 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="bukaWAAdmin()" class="px-3 py-2 rounded-lg border border-green-500 text-green-600 font-black text-[9px] lg:text-[10px] flex items-center gap-1.5 bg-[#f0fdf4] hover:bg-green-100 transition shadow-sm" title="Hubungi Admin"><i class="fa-brands fa-whatsapp text-[12px]"></i> <span class="hidden sm:inline">WA ADMIN</span></button>
-                    <button onclick="openUbahPasswordModal()" class="w-8 h-8 rounded-lg border border-slate-300 text-slate-500 flex items-center justify-center bg-white hover:bg-slate-50 transition shadow-sm" title="Ubah Password"><i class="fa-solid fa-key text-[12px]"></i></button>
+                    <!-- TOMBOL GANTI PASSWORD WALAS -->
+                    <button onclick="openModalGantiPassword('walas')" class="px-3 py-2 rounded-lg border border-blue-500 text-blue-600 font-black text-[9px] lg:text-[10px] flex items-center gap-1.5 bg-[#eff6ff] hover:bg-blue-100 transition shadow-sm" title="Ganti Password"><i class="fa-solid fa-key text-[12px]"></i></button>
                     <button onclick="logoutApp('view-dashboard-walas')" class="w-8 h-8 rounded-lg border border-red-500 text-red-500 flex items-center justify-center bg-[#fef2f2] hover:bg-red-100 transition shadow-sm" title="Keluar"><i class="fa-solid fa-power-off text-[12px]"></i></button>
                 </div>
             </div>
@@ -498,7 +499,8 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="openUbahPasswordModal()" class="w-12 h-12 rounded-xl border border-slate-200 text-slate-500 flex items-center justify-center bg-white hover:bg-slate-50 transition shadow-sm" title="Ubah Password"><i class="fa-solid fa-key text-[18px]"></i></button>
+                        <!-- TOMBOL GANTI PASSWORD WARID -->
+                        <button onclick="openModalGantiPassword('warid')" class="w-12 h-12 rounded-xl border border-blue-500 text-blue-500 flex items-center justify-center bg-[#eff6ff] hover:bg-blue-100 transition shadow-sm" title="Ganti Kode Akses"><i class="fa-solid fa-key text-[18px]"></i></button>
                         <button onclick="logoutApp('view-dashboard-warid')" class="w-12 h-12 rounded-xl border border-red-500 text-red-500 flex items-center justify-center bg-[#fef2f2] hover:bg-red-100 transition shadow-sm" title="Keluar"><i class="fa-solid fa-power-off text-[18px]"></i></button>
                     </div>
                 </div>
@@ -2033,56 +2035,56 @@
 
         function closeModal() { document.getElementById('global-modal').classList.remove('active'); document.getElementById('modal-title').classList.replace('text-red-600', 'text-[#1e3a8a]'); }
         
-        function openUbahPasswordModal() {
-            const modal = document.getElementById('global-modal'); const title = document.getElementById('modal-title'); const body = document.getElementById('modal-body'); document.getElementById('modal-desc').classList.add('hidden');
+        async function prosesReset() { 
+            if(document.getElementById('reset-confirm').value !== 'RESET') return sweetPop('error', 'Salah Ketik!', 'Ketik RESET yang bener dong biar afdol! 😜'); 
             
-            title.innerText = "UBAH KATA SANDI";
-            body.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 mb-1">PASSWORD LAMA</label>
-                        <input type="password" id="pass-old" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] font-black tracking-widest outline-none focus:border-blue-500" placeholder="••••••">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 mb-1">PASSWORD BARU</label>
-                        <input type="password" id="pass-new" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] font-black tracking-widest outline-none focus:border-blue-500" placeholder="••••••">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 mb-1">KONFIRMASI PASSWORD BARU</label>
-                        <input type="password" id="pass-new-confirm" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] font-black tracking-widest outline-none focus:border-blue-500" placeholder="••••••">
-                    </div>
-                    <button onclick="submitChangePassword(this)" class="w-full mt-2 bg-[#1e3a8a] text-white font-black py-3.5 rounded-xl text-[12px] md:text-[13px] shadow-md hover:bg-blue-900 transition flex items-center justify-center gap-2">SIMPAN PASSWORD BARU</button>
-                </div>
-            `;
-            modal.classList.add('active');
+            const btn = document.querySelector('#global-modal button.bg-red-600');
+            if(btn) { btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MENGHAPUS...`; btn.disabled = true; }
+
+            for(let k in DB.siswa) { DB.siswa[k]=[]; DB.pengeluaran[k]=0; DB.riwayatPengeluaran[k]=[]; checklistState[k]={}; } 
+            DB.guru = {}; DB.walasPassword = {}; 
+            
+            DAFTAR_KELAS.length = 0;
+            ["1A", "1B", "1C", "1D", "1 ICP A", "1 ICP B", "2A", "2B", "2C", "2D", "2 ICP A", "2 ICP B", "3A", "3B", "3C", "3D", "3 ICP A", "4A", "4B", "4C", "4D", "5A", "5B", "5C", "5D", "6A", "6B", "6C", "6D"].forEach(k => { DAFTAR_KELAS.push(k); DB.nominalDefault[k] = 50000; });
+
+            await fetchGAS({ action: "uploadMaster", dataWalas: [], dataSiswa: [] });
+
+            updateDashboardView(); closeModal(); 
+            sweetPop('success', 'Tersapu Bersih!', 'Sistem kembali suci seperti bayi baru lahir. Data Server dan Lokal telah dibersihkan! 👼'); 
         }
 
-        async function submitChangePassword(btn) {
-            const oldP = document.getElementById('pass-old').value; const newP = document.getElementById('pass-new').value; const confP = document.getElementById('pass-new-confirm').value;
-
-            if(!oldP || !newP || !confP) return sweetPop('warning', 'Masih Kosong!', 'Isi semua kolom sandi dulu bosku!');
-            if(newP !== confP) return sweetPop('error', 'Nggak Cocok!', 'Password baru dan konfirmasinya nggak sama nih!');
-
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MEMPROSES...`; btn.disabled = true;
-
-            let isWalas = !document.getElementById('view-dashboard-walas').classList.contains('hidden');
-            let role = isWalas ? 'walas' : 'warid';
-            let kelasAktif = isWalas ? kelasWalasAktif : kelasWaridAktif;
-            let idStr = isWalas ? DB.guru[kelasAktif] : DB.siswa[kelasAktif][siswaWaridIdx].nama;
-
-            const res = await fetchGAS({ action: "changePassword", role: role, kelas: kelasAktif, idStr: idStr, oldPass: oldP, newPass: newP });
+        async function globalRefresh() {
+            const icon = document.getElementById('icon-global-refresh'); icon.classList.add('fa-spin');
             
-            if(res.status === 'success') {
-                if(role === 'walas') { if(!DB.walasPassword) DB.walasPassword = {}; DB.walasPassword[kelasAktif] = newP; } 
-                else { DB.siswa[kelasAktif][siswaWaridIdx].pin = newP; }
-                closeModal(); sweetPop('success', 'Berhasil Diubah!', 'Kunci rahasia sudah diganti permanen! Jangan sampai kelupaan ya! 🔐');
-            } else { sweetPop('error', 'Gagal Bosku!', res.message); }
+            // Tarik ulang data Master (Walas, Nominal, Daftar Kelas Dinamis)
+            await loadMasterDataInBackground();
             
-            btn.innerHTML = `SIMPAN PASSWORD BARU`; btn.disabled = false;
+            if(!document.getElementById('view-dashboard-admin').classList.contains('hidden')) { await updateDashboardView(); } 
+            else if(!document.getElementById('view-dashboard-walas').classList.contains('hidden')) { await fetchKelasData(kelasWalasAktif); renderChecklistWalas(); calcStatsWalas(); } 
+            else if(!document.getElementById('view-dashboard-warid').classList.contains('hidden')) { await fetchKelasData(kelasWaridAktif); initDashboardWarid(kelasWaridAktif, siswaWaridIdx); }
+            
+            setTimeout(() => { icon.classList.remove('fa-spin'); showToast("Data terbaru dimuat"); }, 800);
         }
 
-        function prosesReset() { 
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-sm"></i>`;
+        function showToast(msg) { 
+            const t = document.getElementById('toast');
+            document.getElementById('toastContent').innerText = msg;
+            t.style.opacity = '1'; t.style.transform = 'translate(-50%, 0)'; 
+            if(navigator.vibrate) navigator.vibrate(20);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translate(-50%, -20px)'; }, 2500); 
+        }
+
+        function sweetPop(type, title, msg) {
+            const overlay = document.getElementById('fun-popup-overlay');
+            const card = document.getElementById('fun-popup-card');
+            const icon = document.getElementById('fun-popup-icon');
+            const titleEl = document.getElementById('fun-popup-title');
+            const msgEl = document.getElementById('fun-popup-msg');
+            const btn = document.getElementById('fun-popup-btn');
+
+            titleEl.innerText = title;
+            if (Array.isArray(msg)) msgEl.innerText = msg[Math.floor(Math.random() * msg.length)];
+            else msgEl.innerText = msg;
 
             card.className = "bg-white rounded-3xl p-6 pt-8 max-w-[300px] w-full transform scale-75 opacity-0 transition-all duration-300 text-center relative mt-8 border-2 shadow-2xl";
             icon.className = "absolute -top-8 left-1/2 transform -translate-x-1/2 text-[55px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.2)] z-10 whitespace-nowrap animate-bounce";
@@ -2228,6 +2230,82 @@
             document.body.style.backgroundColor = '#f8fafc';
             document.getElementById('pin-admin').value = 'adminin'; document.getElementById('pin-walas').value = ''; document.getElementById('pin-warid').value = '';
         }
+
+        function openModalGantiPassword(role) {
+            const modal = document.getElementById('global-modal'); const body = document.getElementById('modal-body'); const title = document.getElementById('modal-title');
+            title.innerText = role === 'walas' ? "GANTI PIN WALI KELAS" : "GANTI KODE AKSES SISWA";
+            
+            body.innerHTML = `
+                <div class="space-y-4 px-2">
+                    <p class="text-[11px] font-bold text-slate-500 text-center mb-4">Pastikan Anda mengingat kata sandi yang baru!</p>
+                    
+                    <div class="relative">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">Password Lama</label>
+                        <div class="premium-input rounded-xl relative border-slate-200">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-unlock text-slate-400 text-[11px]"></i></div>
+                            <input type="password" id="cp-old" class="w-full py-3 pl-9 pr-10 text-[13px] font-black tracking-widest text-slate-700 bg-transparent outline-none rounded-xl" placeholder="••••••">
+                            <button type="button" onclick="toggleVis('cp-old', 'eye-cp-old')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-blue-600 transition"><i id="eye-cp-old" class="fa-regular fa-eye text-xs"></i></button>
+                        </div>
+                    </div>
+                    <div class="relative mt-3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">Password Baru (Min. 4 digit)</label>
+                        <div class="premium-input rounded-xl relative border-slate-200">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-key text-blue-500 text-[11px]"></i></div>
+                            <input type="password" id="cp-new" class="w-full py-3 pl-9 pr-10 text-[13px] font-black tracking-widest text-slate-700 bg-transparent outline-none rounded-xl" placeholder="••••••">
+                            <button type="button" onclick="toggleVis('cp-new', 'eye-cp-new')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-blue-600 transition"><i id="eye-cp-new" class="fa-regular fa-eye text-xs"></i></button>
+                        </div>
+                    </div>
+                    <div class="relative mt-3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">Ulangi Password Baru</label>
+                        <div class="premium-input rounded-xl relative border-slate-200">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fa-solid fa-check-double text-green-500 text-[11px]"></i></div>
+                            <input type="password" id="cp-confirm" class="w-full py-3 pl-9 pr-10 text-[13px] font-black tracking-widest text-slate-700 bg-transparent outline-none rounded-xl" placeholder="••••••">
+                            <button type="button" onclick="toggleVis('cp-confirm', 'eye-cp-confirm')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-blue-600 transition"><i id="eye-cp-confirm" class="fa-regular fa-eye text-xs"></i></button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="submitChangePassword('${role}', this)" class="w-full bg-[#1e3a8a] hover:bg-blue-900 text-white font-black py-3.5 rounded-xl text-[12px] shadow-md transition mt-6 flex items-center justify-center gap-2">SIMPAN PASSWORD</button>
+                </div>
+            `;
+            modal.classList.add('active');
+        }
+
+        async function submitChangePassword(role, btn) {
+            const oldP = document.getElementById('cp-old').value;
+            const newP = document.getElementById('cp-new').value;
+            const confP = document.getElementById('cp-confirm').value;
+
+            if(!oldP || !newP || !confP) return sweetPop('warning', 'Masih Kosong!', 'Isi semua kolom dulu bosku! 👀');
+            if(newP.length < 4) return sweetPop('error', 'Terlalu Pendek!', 'Password baru minimal 4 karakter dong!');
+            if(newP !== confP) return sweetPop('error', 'Tidak Cocok!', 'Konfirmasi password baru tidak sama! 😅');
+
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MEMPROSES...`;
+            btn.disabled = true;
+
+            const targetKelas = role === 'walas' ? kelasWalasAktif : kelasWaridAktif;
+            const targetIdStr = role === 'walas' ? "N/A" : selectedSiswaWarid; 
+
+            const payload = { action: "changePassword", role: role, kelas: targetKelas, idStr: targetIdStr, oldPass: oldP, newPass: newP };
+            
+            const res = await fetchGAS(payload);
+            
+            if (res.status === 'success') {
+                // Update Cache Lokal agar tidak perlu refresh
+                if(role === 'walas') {
+                    if(!DB.walasPassword) DB.walasPassword = {};
+                    DB.walasPassword[targetKelas] = newP;
+                } else if(role === 'warid') {
+                    const idx = DB.siswa[targetKelas].findIndex(s => s.nama === targetIdStr);
+                    if(idx !== -1) DB.siswa[targetKelas][idx].pin = newP;
+                }
+                closeModal();
+                sweetPop('success', 'Berhasil!', 'Password berhasil diganti dan disimpan ke server! 🚀');
+            } else {
+                sweetPop('error', 'Gagal!', res.message || 'Password lama salah atau server error!');
+                btn.innerHTML = `SIMPAN PASSWORD`; btn.disabled = false;
+            }
+        }
+
 
         initApp();
     </script>
